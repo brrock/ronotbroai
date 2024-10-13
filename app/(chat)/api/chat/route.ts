@@ -1,3 +1,4 @@
+import { SearxngClient } from '@agentic/searxng'
 import { convertToCoreMessages, Message, streamText } from "ai";
 import { z } from "zod";
 
@@ -5,6 +6,7 @@ import { customModel } from "@/ai";
 import { auth } from "@/app/(auth)/auth";
 import { deleteChatById, getChatById, saveChat } from "@/db/queries";
 
+const searxng = new SearxngClient()
 export async function POST(request: Request) {
   const { id, messages }: { id: string; messages: Array<Message> } =
     await request.json();
@@ -20,7 +22,7 @@ export async function POST(request: Request) {
   const result = await streamText({
     model: customModel,
     system:
-      "you are a friendly assistant! keep your responses concise and helpful.",
+      "you are a friendly assistant! keep your responses concise and helpful. You are great at coding. You are very passionate about planes.",
     messages: coreMessages,
     maxSteps: 5,
     tools: {
@@ -37,6 +39,9 @@ export async function POST(request: Request) {
 
           const weatherData = await response.json();
           return weatherData;
+        },
+        createAISDKTools() {
+          searxng
         },
       },
     },

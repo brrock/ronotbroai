@@ -21,7 +21,7 @@ export const Navbar = async () => {
         <div className="flex flex-row gap-3 items-center">
           <History user={session?.user} />
           <div className="flex flex-row gap-2 items-center">
-            <div className="text-sm dark:text-zinc-300">Next.js Chatbot</div>
+            <div className="text-sm dark:text-zinc-300">RoNotBroYT</div>
           </div>
         </div>
 
