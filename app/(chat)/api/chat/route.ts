@@ -1,4 +1,4 @@
-import { SearxngClient } from '@agentic/searxng'
+import { Browserbase, BrowserbaseAISDK } from "@browserbasehq/sdk";
 import { convertToCoreMessages, Message, streamText } from "ai";
 import { z } from "zod";
 
@@ -6,7 +6,17 @@ import { customModel } from "@/ai";
 import { auth } from "@/app/(auth)/auth";
 import { deleteChatById, getChatById, saveChat } from "@/db/queries";
 
-const searxng = new SearxngClient()
+let browserbase;
+let browserTool: { description: string; parameters: z.ZodObject<{ url: z.ZodString; }, "strip", z.ZodTypeAny, { url?: string; }, { url?: string; }>; execute: ({ url }: { url: string; }) => Promise<{ page: string; }>; };
+try {
+  browserbase = new Browserbase({
+    apiKey: process.env.BROWSERBASE_API_KEY,
+    projectId: process.env.BROWSERBASE_PROJECT_ID
+  });
+  browserTool = BrowserbaseAISDK(browserbase, { textContent: true });
+} catch (error) {
+  console.error("Error initializing Browserbase:", error);
+}
 export async function POST(request: Request) {
   const { id, messages }: { id: string; messages: Array<Message> } =
     await request.json();
@@ -22,7 +32,7 @@ export async function POST(request: Request) {
   const result = await streamText({
     model: customModel,
     system:
-      "you are a friendly assistant! keep your responses concise and helpful. You are great at coding. You are very passionate about planes and of wheather data provide longitude and latitude for them.",
+      "you are a friendly assistant! keep your responses concise and helpful. You are great at coding. You are very passionate about planes and for wheather data provide longitude and latitude for them.",
     messages: coreMessages,
     maxSteps: 5,
     tools: {
@@ -40,9 +50,7 @@ export async function POST(request: Request) {
           const weatherData = await response.json();
           return weatherData;
         },
-        createAISDKTools() {
-          searxng
-        },
+        browserTool, 
       },
     },
     onFinish: async ({ responseMessages }) => {
