@@ -1,4 +1,4 @@
-import { Browserbase, BrowserbaseAISDK } from "@browserbasehq/sdk";
+
 import { convertToCoreMessages, Message, streamText } from "ai";
 import { z } from "zod";
 
@@ -6,17 +6,7 @@ import { customModel } from "@/ai";
 import { auth } from "@/app/(auth)/auth";
 import { deleteChatById, getChatById, saveChat } from "@/db/queries";
 
-let browserbase;
-let browserTool: { description: string; parameters: z.ZodObject<{ url: z.ZodString; }, "strip", z.ZodTypeAny, { url?: string; }, { url?: string; }>; execute: ({ url }: { url: string; }) => Promise<{ page: string; }>; };
-try {
-  browserbase = new Browserbase({
-    apiKey: process.env.BROWSERBASE_API_KEY,
-    projectId: process.env.BROWSERBASE_PROJECT_ID
-  });
-  browserTool = BrowserbaseAISDK(browserbase, { textContent: true });
-} catch (error) {
-  console.error("Error initializing Browserbase:", error);
-}
+
 export async function POST(request: Request) {
   const { id, messages }: { id: string; messages: Array<Message> } =
     await request.json();
@@ -32,12 +22,12 @@ export async function POST(request: Request) {
   const result = await streamText({
     model: customModel,
     system:
-      "you are a friendly assistant! keep your responses concise and helpful. You are great at coding. You are very passionate about planes and for wheather data provide longitude and latitude for them.",
+      "you are a friendly assistant! keep your responses concise and helpful. You are great at coding. You are very passionate about planes. For Measurements use UK ones.",
     messages: coreMessages,
     maxSteps: 5,
     tools: {
       getWeather: {
-        description: "Get the current weather at a location",
+        description: "Get the current weather at a location. Provide longitude and latitude for the place given.",
         parameters: z.object({
           latitude: z.number(),
           longitude: z.number(),
@@ -50,7 +40,6 @@ export async function POST(request: Request) {
           const weatherData = await response.json();
           return weatherData;
         },
-        browserTool, 
       },
     },
     onFinish: async ({ responseMessages }) => {
@@ -67,7 +56,7 @@ export async function POST(request: Request) {
       }
     },
     experimental_telemetry: {
-      isEnabled: true,
+      isEnabled: false,
       functionId: "stream-text",
     },
   });
