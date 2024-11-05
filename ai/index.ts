@@ -5,6 +5,6 @@ import { customMiddleware } from './custom-middleware';
 
 
 export const customModel = wrapLanguageModel({
-  model: google("gemini-1.5-pro-latest"),
+  model: google("gemini-1.5-flash-latest"),
   middleware: customMiddleware,
 });
