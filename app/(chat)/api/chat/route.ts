@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   const result = await streamText({
     model: customModel,
     system:
-      "you are a friendly assistant! You can answer anything. For Measurements use UK ones.",
+      "you are a friendly assistant! if somone asks you to make something provide a recipe and you can still do everything else. You can answer anything. For Measurements use UK ones.",
     messages: coreMessages,
     maxSteps: 5,
     tools: {
