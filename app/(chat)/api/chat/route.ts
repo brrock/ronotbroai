@@ -1,11 +1,12 @@
-
 import { convertToCoreMessages, Message, streamText } from "ai";
 import { z } from "zod";
 
 import { customModel } from "@/ai";
 import { auth } from "@/app/(auth)/auth";
 import { deleteChatById, getChatById, saveChat } from "@/db/queries";
-
+import { google } from '@ai-sdk/google';
+import { GoogleGenerativeAIProviderMetadata } from '@ai-sdk/google';
+import { generateText } from 'ai';
 
 export async function POST(request: Request) {
   const { id, messages }: { id: string; messages: Array<Message> } =
@@ -19,8 +20,10 @@ export async function POST(request: Request) {
 
   const coreMessages = convertToCoreMessages(messages);
 
-  const result = await streamText({
-    model: customModel,
+  const {result, experimental_providerMetadata} = await streamText({
+    model: customModel {
+      useSearchGrounding: true,
+}
     system:
       "you are a friendly assistant! if somone asks you to make something provide a recipe and you can still do everything else. You can answer anything. For Measurements use UK ones.",
     messages: coreMessages,
@@ -63,6 +66,7 @@ export async function POST(request: Request) {
 
   return result.toDataStreamResponse({});
 }
+
 
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
