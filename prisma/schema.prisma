@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique @db.VarChar(64)
+  password    String?      @db.VarChar(64)
+  chats       Chat[]
+  documents   Document[]
+  suggestions Suggestion[]
+}
+
+model Chat {
+  id         String    @id @default(uuid())
+  createdAt  DateTime
+  title      String    @db.Text
+  userId     String
+  visibility String    @default("private") @db.VarChar
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages   Message[]
+  votes      Vote[]
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String
+  role      String   @db.VarChar
+  content   Json
+  createdAt DateTime
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  votes     Vote[]
+}
+
+model Vote {
+  chatId    String
+  messageId String
+  isUpvoted Boolean
+  chat      Chat    @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@id([chatId, messageId])
+}
+
+model Document {
+  id          String       @default(uuid())
+  createdAt   DateTime
+  title       String       @db.Text
+  content     String?      @db.Text
+  kind        String       @default("text") @db.VarChar
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  suggestions Suggestion[]
+
+  @@id([id, createdAt])
+}
+
+model Suggestion {
+  id                String   @id @default(uuid())
+  documentId        String
+  documentCreatedAt DateTime
+  originalText      String   @db.Text
+  suggestedText     String   @db.Text
+  description       String?  @db.Text
+  isResolved        Boolean  @default(false)
+  userId            String
+  createdAt         DateTime
+  document          Document @relation(fields: [documentId, documentCreatedAt], references: [id, createdAt], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
