@@ -8,6 +8,7 @@ import { signIn } from 'next-auth/react';
 import { AuthForm } from '@/components/auth-form';
 import { SubmitButton } from '@/components/submit-button';
 import { register } from '../actions';
+import { Suspense } from 'react';
 
 export default function Page() {
   const router = useRouter();
@@ -61,6 +62,7 @@ export default function Page() {
             Create an account with your email and password
           </p>
         </div>
+        <Suspense fallback={<div>Loading...</div>}>
         <AuthForm action={handleSubmit}>
           <SubmitButton>Sign Up</SubmitButton>
           <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
@@ -74,6 +76,7 @@ export default function Page() {
             {' instead.'}
           </p>
         </AuthForm>
+        </Suspense>
       </div>
     </div>
   );
