@@ -1,3 +1,4 @@
+// @ts-expect-error
 import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
@@ -10,7 +11,7 @@ export const authConfig = {
     // while this file is also used in non-Node.js environments
   ],
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
+    authorized({ auth, request: { nextUrl } }: { auth: any, request: { nextUrl: URL } }) {
       const isLoggedIn = !!auth?.user;
       const isOnChat = nextUrl.pathname.startsWith('/');
       const isOnRegister = nextUrl.pathname.startsWith('/register');
