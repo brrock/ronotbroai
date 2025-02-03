@@ -1,1 +1,1 @@
-export { GET, POST } from '@/app/(auth)/auth';
+export { default } from 'next-auth/middleware';
